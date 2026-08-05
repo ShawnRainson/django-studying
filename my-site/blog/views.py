@@ -1,4 +1,13 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 
 def home(request):
-    return HttpResponse("Hello! This is my first web page!")
+    context = {
+        "title": "Main page",
+        "username": "Shawn",
+        "posts": [
+            "First page",
+            'Django studying',
+            'My first project'
+        ]
+        }
+    return render(request, "blog/home.html", context)
