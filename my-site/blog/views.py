@@ -2,12 +2,12 @@ from django.shortcuts import render
 
 def home(request):
     context = {
-        "title": "Main page",
-        "username": "Shawn",
-        "posts": [
-            "First page",
-            'Django studying',
-            'My first project'
+        "name": "Shawn",
+        "age": 21,
+        "technologies": [
+            "Python",
+            'Django',
+            'HTML'
         ]
         }
-    return render(request, "blog/home.html", context)
+    return render(request, "profile/profile.html", context)

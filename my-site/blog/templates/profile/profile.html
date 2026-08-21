@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<body>
+    <h1>Name: {{ name }}</h1>
+    <h2>Age: {{ age }}</h2>
+    <h3>Technologies:
+        {% for tech in technologies %}
+           <li>{{ tech }}</li>
+        {%endfor%}
+    </h3>
+</body>
