@@ -1351,3 +1351,881 @@ App реализует конкретную часть функциональн�
 INSTALLED_APPS сообщает Django, какие Apps входят в проект.
 
 Теперь твоя очередь, ученик. Отвечай на задания 1–5, а затем покажи результат практики 6–7. 🥋
+
+🥋 День 3 — URLs и Views
+🎯 Цели дня
+
+Сегодня ты поймёшь:
+
+что такое URL в Django;
+что такое urls.py;
+что такое View;
+как браузерный запрос проходит через Django;
+как связать URL с View;
+что такое request;
+что такое HttpResponse;
+почему urls.py и views.py отвечают за разные вещи;
+как сделать несколько страниц;
+как подключать URLs приложения к главным URLs проекта.
+
+К концу урока у тебя будет примерно такое:
+
+http://127.0.0.1:8000/
+        ↓
+      Django
+        ↓
+    urls.py
+        ↓
+      View
+        ↓
+ HttpResponse
+        ↓
+    Браузер
+1. 🧠 Что вообще происходит, когда мы открываем сайт?
+
+Допустим, ты открываешь:
+
+http://127.0.0.1:8000/
+
+Браузер отправляет Django запрос:
+
+«Дай мне страницу по адресу /.»
+
+Django должен понять:
+
+«Какой код должен обработать этот запрос?»
+
+И здесь появляется:
+
+urls.py
+
+Он занимается маршрутизацией.
+
+Можно представить его как диспетчера:
+
+Запрос
+  ↓
+urls.py
+  ↓
+Куда отправить запрос?
+2. 🗺️ Что такое URL-маршрутизация?
+
+Представь сайт:
+
+127.0.0.1:8000/
+127.0.0.1:8000/about/
+127.0.0.1:8000/blog/
+127.0.0.1:8000/contact/
+
+У каждого URL может быть своё поведение.
+
+Например:
+
+/        → главная
+/about/  → информация о сайте
+/blog/   → список постов
+/contact/ → контакты
+
+Django должен сопоставить URL с определённым кодом.
+
+Например:
+
+"/about/"
+    ↓
+about_view()
+3. 👀 Что такое View?
+
+View — это код, который обрабатывает запрос и возвращает ответ.
+
+Например:
+
+from django.http import HttpResponse
+
+
+def hello(request):
+    return HttpResponse("Hello Django!")
+
+Здесь:
+
+def hello(request):
+
+это View.
+
+А:
+
+return HttpResponse("Hello Django!")
+
+означает:
+
+«Верни браузеру HTTP-ответ с текстом Hello Django!».
+
+4. 🧠 Очень важное разделение
+
+У нас появляются две разные задачи.
+
+urls.py
+
+Отвечает:
+
+Куда направить запрос?
+
+views.py
+
+Отвечает:
+
+Что сделать с запросом?
+
+Например:
+
+Браузер
+   │
+   │ GET /hello/
+   ↓
+urls.py
+   │
+   │ "hello/" → hello
+   ↓
+views.py
+   │
+   │ hello(request)
+   ↓
+HttpResponse("Hello Django!")
+   │
+   ↓
+Браузер
+
+Это одна из самых важных схем сегодняшнего дня.
+
+5. Создаём первое View
+
+Открой:
+
+blog/views.py
+
+Сейчас там примерно:
+
+from django.shortcuts import render
+
+Добавь:
+
+from django.http import HttpResponse
+
+
+def hello(request):
+    return HttpResponse("Hello Django!")
+
+Теперь у нас есть функция:
+
+hello
+
+Она принимает:
+
+request
+
+и возвращает:
+
+HttpResponse
+6. Что такое request?
+
+Ты увидишь такую конструкцию постоянно:
+
+def hello(request):
+
+request — это объект, содержащий информацию о запросе пользователя.
+
+Например, Django может узнать из него:
+
+какой HTTP-метод использовался;
+какие параметры передали;
+какие заголовки отправил браузер;
+кто пользователь;
+какую информацию содержит запрос.
+
+Пока нам достаточно упрощённой модели:
+
+request
+   ↓
+«Что пользователь попросил у Django?»
+7. Что такое HttpResponse?
+
+Мы написали:
+
+return HttpResponse("Hello Django!")
+
+HttpResponse — это HTTP-ответ.
+
+То есть:
+
+request
+    ↓
+View
+    ↓
+response
+
+Например:
+
+Запрос:
+GET /hello/
+
+Ответ:
+Hello Django!
+
+Браузер получает ответ и показывает его пользователю.
+
+8. 🛣️ Теперь нужно связать URL с View
+
+Создать View недостаточно.
+
+У нас сейчас есть:
+
+def hello(request):
+    return HttpResponse("Hello Django!")
+
+Но Django пока не знает:
+
+«Когда пользователь откроет /hello/, нужно вызвать hello».
+
+Для этого открываем:
+
+mysite/urls.py
+
+Сейчас там примерно:
+
+from django.contrib import admin
+from django.urls import path
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+]
+9. Импортируем наше View
+
+Добавляем:
+
+from blog.views import hello
+
+Получается:
+
+from django.contrib import admin
+from django.urls import path
+
+from blog.views import hello
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+]
+
+Теперь Django знает о функции:
+
+hello
+10. Добавляем маршрут
+
+В urlpatterns добавляем:
+
+path("hello/", hello),
+
+Получается:
+
+from django.contrib import admin
+from django.urls import path
+
+from blog.views import hello
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("hello/", hello),
+]
+
+Теперь Django знает:
+
+/hello/
+   ↓
+hello()
+11. 🚀 Проверяем
+
+Запускаем:
+
+py manage.py runserver
+
+Открываем:
+
+http://127.0.0.1:8000/hello/
+
+Должно появиться:
+
+Hello Django!
+
+🎉
+
+Поздравляю.
+
+Ты только что создал свою первую страницу Django.
+
+12. 🧠 Разбираем path()
+
+Мы написали:
+
+path("hello/", hello)
+
+У path() здесь два основных аргумента:
+
+path(URL, VIEW)
+
+То есть:
+
+path("hello/", hello)
+
+означает:
+
+Если URL соответствует hello/, вызвать hello.
+
+13. Почему мы пишем hello, а не hello()?
+
+Это очень важный момент.
+
+Правильно:
+
+path("hello/", hello)
+
+Неправильно:
+
+path("hello/", hello())
+
+Почему?
+
+Потому что:
+
+hello
+
+— это ссылка на функцию.
+
+А:
+
+hello()
+
+— это немедленный вызов функции.
+
+Django нужно сказать:
+
+«Вот функция, вызови её, когда придёт подходящий запрос».
+
+Поэтому:
+
+hello
+
+а не:
+
+hello()
+14. 🔥 Сделаем ещё одну страницу
+
+В blog/views.py:
+
+from django.http import HttpResponse
+
+
+def hello(request):
+    return HttpResponse("Hello Django!")
+
+
+def about(request):
+    return HttpResponse("This is the About page.")
+
+Теперь в mysite/urls.py:
+
+from django.contrib import admin
+from django.urls import path
+
+from blog.views import hello, about
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("hello/", hello),
+    path("about/", about),
+]
+
+Теперь у нас:
+
+/hello/
+    ↓
+Hello Django!
+
+/about/
+    ↓
+This is the About page.
+15. 🧠 Посмотри на архитектуру
+
+Сейчас у тебя получилось:
+
+mysite/
+│
+├── manage.py
+│
+├── mysite/
+│   ├── settings.py
+│   └── urls.py
+│
+└── blog/
+    └── views.py
+
+Связь:
+
+mysite/urls.py
+       │
+       ├── /hello/ → blog.views.hello
+       │
+       └── /about/ → blog.views.about
+16. А если URL не существует?
+
+Допустим, ты открываешь:
+
+http://127.0.0.1:8000/banana/
+
+А такого маршрута нет:
+
+path("banana/", ...)
+
+Django не найдёт подходящий маршрут.
+
+В режиме разработки ты увидишь:
+
+404
+
+Это означает:
+
+404 Not Found
+
+То есть:
+
+Django не нашёл подходящий URL.
+
+17. 🧠 Как Django ищет маршрут?
+
+Посмотри:
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("hello/", hello),
+    path("about/", about),
+]
+
+Django проверяет маршруты.
+
+Условно:
+
+Запрос /hello/
+
+↓
+admin/ ? ❌
+↓
+hello/ ? ✅
+↓
+вызываем hello()
+
+А если:
+
+Запрос /banana/
+
+↓
+admin/ ? ❌
+↓
+hello/ ? ❌
+↓
+about/ ? ❌
+↓
+404
+18. ⚠️ Важная деталь: порядок маршрутов
+
+Порядок urlpatterns имеет значение.
+
+Django проверяет маршруты сверху вниз и использует первый подходящий маршрут.
+
+Поэтому порядок маршрутов иногда критически важен.
+
+Мы подробнее увидим это, когда начнём работать с динамическими URL.
+
+19. 🏗️ Почему не хранить все URL в главном urls.py?
+
+Сейчас у нас маленький проект:
+
+/hello/
+/about/
+
+И всё удобно.
+
+Но представь большой проект:
+
+/users/
+/users/login/
+/users/register/
+/users/profile/
+/blog/
+/blog/posts/
+/blog/posts/1/
+/blog/categories/
+/comments/
+/comments/create/
+/shop/
+/shop/products/
+/shop/cart/
+
+Если записать всё в:
+
+mysite/urls.py
+
+файл быстро станет огромным.
+
+Поэтому Django позволяет каждому App иметь свой urls.py.
+
+И это очень важный следующий шаг.
+
+20. 🧩 Создаём blog/urls.py
+
+Django автоматически его не создаёт.
+
+Создай файл:
+
+blog/
+├── admin.py
+├── apps.py
+├── models.py
+├── tests.py
+├── views.py
+└── urls.py       ← создаём сами
+
+Внутри:
+
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+    path("hello/", views.hello),
+    path("about/", views.about),
+]
+
+Обрати внимание:
+
+from . import views
+
+Точка:
+
+.
+
+означает:
+
+текущий пакет blog.
+
+21. 🔗 Подключаем blog/urls.py
+
+Теперь главный:
+
+mysite/urls.py
+
+Можно сделать так:
+
+from django.contrib import admin
+from django.urls import include, path
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("blog.urls")),
+]
+
+Здесь появился:
+
+include
+22. Что делает include()?
+
+Он говорит Django:
+
+«Если запрос подходит сюда, передай дальнейшую маршрутизацию другому urls.py.»
+
+Получается:
+
+Главный urls.py
+        │
+        │ include("blog.urls")
+        ↓
+   blog/urls.py
+        │
+   ┌────┴────┐
+   ↓         ↓
+hello/     about/
+
+Это позволяет каждому App управлять своими маршрутами.
+
+23. 🧠 Теперь структура становится красивее
+mysite/
+│
+├── manage.py
+│
+├── mysite/
+│   ├── settings.py
+│   └── urls.py
+│
+└── blog/
+    ├── urls.py
+    └── views.py
+
+Главный urls.py:
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("blog.urls")),
+]
+
+App blog:
+
+urlpatterns = [
+    path("hello/", views.hello),
+    path("about/", views.about),
+]
+24. 🧠 Что происходит теперь?
+
+Пользователь открывает:
+
+/hello/
+
+Django делает:
+
+                    /hello/
+                       ↓
+                mysite/urls.py
+                       ↓
+              include("blog.urls")
+                       ↓
+                 blog/urls.py
+                       ↓
+                   hello/
+                       ↓
+                views.hello
+                       ↓
+             HttpResponse(...)
+                       ↓
+                   Браузер
+
+Вот это одна из главных схем Django.
+
+25. А почему path("", include(...))?
+
+Мы написали:
+
+path("", include("blog.urls"))
+
+Пустая строка означает:
+
+«Ничего не добавляй к URL на этом уровне».
+
+Поэтому:
+
+/hello/
+
+переходит в:
+
+blog/urls.py
+
+где уже находится:
+
+path("hello/", views.hello)
+
+И получается:
+
+"" + "hello/"
+       ↓
+   /hello/
+26. Можно использовать префикс
+
+Например:
+
+path("blog/", include("blog.urls"))
+
+Тогда:
+
+/hello/
+
+уже не будет адресом нашего View.
+
+Нужно будет:
+
+/blog/hello/
+
+Потому что:
+
+blog/ + hello/
+       ↓
+   blog/hello/
+
+Это очень удобно для организации больших проектов.
+
+🧠 Теперь проверяем понимание
+
+Не спеши. Здесь я хочу увидеть именно твои рассуждения.
+
+Задание 1
+
+Объясни своими словами:
+
+Что такое View?
+
+Не используй официальное определение. Представь, что объясняешь другу.
+
+Задание 2
+
+В чём разница между:
+
+urls.py
+
+и:
+
+views.py
+
+Что делает каждый?
+
+Задание 3
+
+Что означает:
+
+path("hello/", views.hello)
+
+Разбери эту строку по частям.
+
+Задание 4
+
+Почему здесь:
+
+path("hello/", views.hello)
+
+мы пишем:
+
+views.hello
+
+а не:
+
+views.hello()
+Задание 5
+
+Что произойдёт, если пользователь откроет:
+
+http://127.0.0.1:8000/banana/
+
+а такого маршрута нет?
+
+⌨️ Практика — теперь код пишешь ты
+Задача 6 — первое View
+
+В:
+
+blog/views.py
+
+создай:
+
+def hello(request):
+    return HttpResponse("Hello Django!")
+
+Не забудь импорт:
+
+from django.http import HttpResponse
+Задача 7 — подключаем URL
+
+Создай:
+
+blog/urls.py
+
+и подключи:
+
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+    path("hello/", views.hello),
+]
+
+Затем подключи blog.urls в главном:
+
+mysite/urls.py
+
+через:
+
+include
+Задача 8 — проверка
+
+Запусти:
+
+py manage.py runserver
+
+Открой:
+
+http://127.0.0.1:8000/hello/
+
+Ты должен увидеть:
+
+Hello Django!
+⭐ Мини-челлендж
+
+Добавь вторую View:
+
+about
+
+Она должна возвращать:
+
+This is my blog.
+
+И сделай URL:
+
+/about/
+
+В итоге:
+
+/hello/
+    ↓
+Hello Django!
+
+/about/
+    ↓
+This is my blog.
+🔥 Финальный челлендж
+
+Не заглядывая выше, объясни весь путь запроса:
+
+http://127.0.0.1:8000/about/
+
+начиная с момента, когда пользователь нажал Enter в браузере, и заканчивая моментом, когда браузер получил:
+
+This is my blog.
+
+Постарайся рассказать примерно как цепочку:
+
+Браузер
+   ↓
+?
+   ↓
+?
+   ↓
+?
+   ↓
+HttpResponse
+   ↓
+Браузер
+🥋 Главная мысль Дня 3
+
+Если сегодня запомнить только одну вещь, пусть это будет:
+
+URL
+ ↓
+urls.py
+ ↓
+View
+ ↓
+Response
+
+И ещё одно правило:
+
+urls.py решает, КУДА направить запрос.
+views.py решает, ЧТО сделать с запросом.
+
+Сегодня твоя задача — не просто скопировать код, а самостоятельно построить эту цепочку. Именно здесь Django начинает становиться понятным. 🥋
