@@ -5,8 +5,34 @@
         <title>{{ title }}</title>
     </head>
     <body>
-        <h1>{{ title }}</h1>
+        <h1>{{ title|title }}</h1>
         <p>{{ message }}</p>
+        {% if is_published %}
+           <p>Статья опубликована</p>
+        {% else %}
+           <p>Статья не опубликована</p>
+        {% endif %}
+
+        {% for post in posts %}
+           <p>{{ post }}</p>
+        {% endfor %}
+
+        {% for i in test %}
+           <p>{{ i }}</p>
+        {% empty %}
+           <p>List is empty</p>
+        {% endfor %}
+
+        <h1>Count of posts: {{ new_posts|length }}</h1>
+
+        {% for post in new_posts %}
+           <p>Title: {{ post.title }}, Author: {{ post.author }}</p>
+           {% if post.published %}
+               <p>{{ post.title }} is published</p>
+            {% else %}
+               <p>{{ post.title }} is not published</p>
+            {% endif %}
+        {% endfor %}
         <a href="/about/">About blog</a>
     </body>
 </html>
