@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>About blog</title>
-    </head>
-    <body>
-        <h1>About my blog</h1>
-        <p>I'm studying Django here</p>
-        <a href="/">Home</a>
-    </body>
-</html>
+
+{% extends "blog/base.html" %}
+
+{% block title %}О блоге — Мой блог{% endblock %}
+
+{% block content %}
+    <h2>О моём блоге</h2>
+    <p>Здесь я изучаю Django и создаю свой первый сайт.</p>
+{% endblock %}
